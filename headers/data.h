@@ -4,7 +4,7 @@
 #include <memory>
 #include <string>
 #include <filesystem>
-#include <map>
+
 
 extern "C" {
     #include <libavformat/avformat.h>
@@ -13,6 +13,7 @@ extern "C" {
 }
 
 struct FileInfo {
+    std::filesystem::path path;
     std::size_t file_size;
     std::string filename;
     double duration;
@@ -41,7 +42,7 @@ class Playlist {
     Playlist(const Playlist&) = delete;
     Playlist& operator=(const Playlist&) = delete;
     
-    // РАЗОБРАТЬСЯ С СЕМАНТИКОЙ ПЕРЕМЕЩЕНИЙ
+  
     Playlist(Playlist&& other) noexcept 
         : head(std::move(other.head)), 
           tail(std::move(other.tail)), 
@@ -87,6 +88,10 @@ class Playlist {
 
      std::shared_ptr<FilesNode> GetHead() const {
         return head;
+    }
+
+    std::shared_ptr<FilesNode> GetTail() const {
+        return tail;
     }
 };
 
@@ -141,6 +146,7 @@ inline std::string FormatSize(std::size_t bytes) {
 
 inline FileInfo GetInfo(const std::filesystem::path& path) {
     return {
+        path,
         std::filesystem::file_size(path),
         path.filename().string(),
         GetDuration(path)
